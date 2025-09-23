@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#Run 1 CPU trim tasks (~ 1.25 mins each)
+#Trim the split fastq according to the parameters required by 1K bulls pipeline
+#Use different adapters.fa for KCCG and GeneWiz samples
+
+#PBS -P ki31
+#PBS -N bbduk-trim
+#PBS -l walltime=05:00:00
+#PBS -l ncpus=288
+#PBS -l mem=1140GB
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/bbduk-trim.o
+#PBS -e ./PBS_logs/bbduk-trim.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load nci-parallel/1.0.0a
+module load bbtools/39.01
+
+set -e
+
+
+SCRIPT=./Scripts/bbduk_trim.sh
+INPUTS=./Inputs/bbduk_trim.inputs
+
+NCPUS=8
+	
+	
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
