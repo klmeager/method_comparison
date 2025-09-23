@@ -1,0 +1,24 @@
+#!/bin/bash 
+
+#Build new hash table of a reference file
+
+#PBS -P ki31 
+#PBS -N index 
+#PBS -l walltime=04:30:00 
+#PBS -l ncpus=1 
+#PBS -l mem=190GB 
+#PBS -q normal 
+#PBS -W umask=022 
+#PBS -l wd 
+#PBS -o ./PBS_logs_dragmap/index_dragmap.o 
+#PBS -e ./PBS_logs_dragmap/index_dragmap.e 
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load dragmap/1.3.0
+
+ref=./Reference/GCF_016772045.1_ARS-UI_Ramb_v2.0_genomic.fna
+
+dragen-os \
+--build-hash-table true \
+--ht-reference $ref  \
+--output-directory ./Reference/

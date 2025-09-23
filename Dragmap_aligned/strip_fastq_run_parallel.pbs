@@ -1,0 +1,39 @@
+#!/bin/bash 
+
+#strip the /1 or /2 off the read IDs of the older MGIseq fastq to allow dragmap aligner to work
+
+#PBS -P ki31 
+#PBS -N strip_fastq
+#PBS -l walltime=12:00:00 
+#PBS -l ncpus=36
+#PBS -l mem=144GB 
+#PBS -q express 
+#PBS -W umask=022 
+#PBS -l wd 
+#PBS -o ./PBS_logs_dragmap/strip_fastq.o 
+#PBS -e ./PBS_logs_dragmap/strip_fastq.e 
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load nci-parallel/1.0.0a 
+module load pigz/2.7 
+
+set -e 
+
+SCRIPT=./Scripts/strip_fastq.sh 
+INPUTS=./Inputs/strip_fastq.inputs
+ 
+NCPUS=2
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file

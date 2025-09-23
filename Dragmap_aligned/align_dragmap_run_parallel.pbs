@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#PBS -P ki31
+#PBS -N align_pairs
+#PBS -l walltime=01:30:00
+#PBS -l ncpus=1344
+#PBS -l mem=5320GB
+#PBS -q express
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/align_pairs.o-Y1368
+#PBS -e ./PBS_logs/align_pairs.e-Y1368
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+# resources: 3819 pairs to align, give each 12 CPUs --> 45828 CPUs total to align all at once. This is 954.75 nodes. 
+# Do 191 nodes, so this will run ~ 5 batches with not too much idle CPUs at the end of the list we hope. 
+# Giving 2 hrs walltime, overkill, but better to be safe!
+# So setting resources to 191 nodes = 9168 CPUs and x190 GB = 36290GB. Each alignment takes ~6 minutes, x5 batches will probably be done in 30 mins.
+
+module load nci-parallel/1.0.0a
+module load dragmap/1.3.0
+module load samtools/1.12
+
+set -e
+
+SCRIPT=./Scripts/align_dragmap.sh
+INPUTS=./Inputs/align_pairs_dragmap.inputs-Y1368
+
+NCPUS=12
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
