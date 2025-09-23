@@ -42,9 +42,9 @@ We compared six variant calling pipelines on 25 ovine whole genome sequences:
    - Variant calling with GATK HaplotypeCaller  
    - Compared for runtime vs sensitivity trade-offs relative to BWA-MEM2  
 
-4. **DragMap → Dragen**  
-   - DragMap alignment  
-   - Variant calling with Illumina Dragen software  
+4. **Dragmap → Dragen**  
+   - Dragmap alignment  
+   - Variant calling with GATK haplocaller in Dragen mode  
    - Evaluated for accuracy and efficiency compared to other pipelines  
 
 5. **BWA-MEM2 → DeepVariant**  
@@ -52,7 +52,7 @@ We compared six variant calling pipelines on 25 ovine whole genome sequences:
    - Variant calling with Google DeepVariant (CNN-based)  
    - Tested for reproducibility and sensitivity against GATK  
 
-6. **DragMap → DeepVariant**  
+6. **Dragmap → DeepVariant**  
    - DragMap alignment  
    - Variant calling with DeepVariant   
 
