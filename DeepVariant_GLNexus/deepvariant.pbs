@@ -1,0 +1,26 @@
+#!/bin/bash
+ 
+# run deepvariant
+ 
+#PBS -P ki31
+#PBS -l walltime=05:00:00
+#PBS -l ncpus=48
+#PBS -l ngpus=4
+#PBS -l mem=126GB
+#PBS -q gpuvolta
+#PBS -W umask=022
+#PBS -l wd
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load parabricks/4.2.1
+
+ref=/scratch/ki31/sheep/Reference/ARS-UI_Ramb_v2.0_genomic.fasta
+INPUT_BAM=/g/data/ki31/sheep/Dragmap_bams/${sample}.merged.dedup.coordsorted.bam
+OUTPUT_VCF=/scratch/ki31/sheep/DeepVariant/Dragmap_GVCF/${sample}.g.vcf.gz
+
+pbrun deepvariant \
+    --ref ${ref} \
+    --in-bam ${INPUT_BAM} \
+    --gvcf \
+    --logfile /scratch/ki31/sheep/DeepVariant/Dragmap_GVCF_logs/${sample}_deepvariant_log.txt \
+    --out-variants ${OUTPUT_VCF}
