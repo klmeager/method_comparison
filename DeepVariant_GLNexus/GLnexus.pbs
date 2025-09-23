@@ -1,0 +1,32 @@
+#!/bin/bash
+ 
+# merge DeepVariant gvcf
+ 
+#PBS -P ki31
+#PBS -l walltime=04:00:00
+#PBS -l ncpus=16
+#PBS -l mem=490GB
+#PBS -q hugemem
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/GLnexus.o
+#PBS -e ./PBS_logs/GLnexus.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load singularity
+module load bcftools
+module load htslib
+
+inputs=./Inputs/GLnexus_dragmap.inputs
+log=./GLnexus.DB.dragmap.log
+out=25samples_dragmap_deepvariant
+
+singularity run \
+    /scratch/ki31/ke7395/singularity/glnexus_v1.4.1.sif \
+    glnexus_cli \
+    --dir ./GLNexus_dragmap \
+    --config DeepVariantWGS \
+    --list ${inputs} > ${out}.bcf
+
+bcftools view ${out}.bcf | bgzip -c > ${out}.vcf.gz
+tabix -p vcf ${out}.vcf.gz
