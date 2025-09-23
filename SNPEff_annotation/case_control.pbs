@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# The "caseControl" command instructs the SnpSift program to count the number homozygous non-reference, heterozygous and allele count (number of non-reference alleles in each DNA sample) for both cases and controls groups
+
+#PBS -P ki31
+#PBS -N casecontrol
+#PBS -l walltime=08:00:00
+#PBS -l ncpus=4
+#PBS -l mem=16GB
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./SnpEff/Cere_atax/casecontrol.o
+#PBS -e ./SnpEff/Cere_atax/casecontrol.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+
+module load java
+module load pigz/2.7  
+
+disease=Cere_atax
+
+snpsift=/g/data/ki31/apps/snpEff/SnpSift.jar
+vcf_in=/scratch/ki31/sheep/GLnexus/33samples_BWAMEM2_deepvariant_annotate.vcf.gz
+casecontrol_out=./SnpEff/${disease}/Ramb2.0_33samples.casecontrol_${disease}.g.vcf
+
+
+java -Xmx14g -jar ${snpsift} \
+    caseControl \
+    -v \
+    -tfam /scratch/ki31/sheep/Inputs/samples_33s.tfam \
+    ${vcf_in} \
+    > ${casecontrol_out}
+
+
+#This analysis creates an output VCF file by adding new information to the INFO field for each variant
+#Eg Cases=1,1,3 and Controls=8,6,22 which corresponds to the number of homozygous alternate, heterozygous and total allele counts in cases and controls for each variant.
+#allele count=number of non-reference alleles in each DNA sample
+
+pigz -cp 4 ${casecontrol_out} > ${casecontrol_out}.gz
+rm ${casecontrol_out}

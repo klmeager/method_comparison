@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Filter variants segregating in a recessive mode of inheritance (hom alt in all cases and no control being hom alt) AND that are moderate or high impacting
+
+#PBS -P ki31
+#PBS -N filter_impact
+#PBS -l walltime=03:00:00
+#PBS -l ncpus=1
+#PBS -l mem=4GB
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./SnpEff/Cere_atax/filter_impact.o
+#PBS -e ./SnpEff/Cere_atax/filter_impact.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load java
+
+disease="Cere_atax"
+
+snpsift="/g/data/ki31/apps/snpEff/SnpSift.jar"
+tfam_file="/scratch/ki31/sheep/Inputs/samples_33s.tfam"
+vcf_in="./SnpEff/${disease}/Ramb2.0_33samples.casecontrol_${disease}.g.vcf.gz"
+output_base="./SnpEff/${disease}/Ramb2.0_33samples.filtered_impact_${disease}"
+
+# Count cases and controls
+NUM_CASES=$(awk '$6 == 2' "${tfam_file}" | wc -l)
+NUM_CONTROLS=$(awk '$6 == 1' "${tfam_file}" | wc -l)
+
+echo "Detected ${NUM_CASES} cases and ${NUM_CONTROLS} controls"
+
+# Define expected genotype counts in INFO field for strict filter
+HOM_ALT_CASES=${NUM_CASES}
+HET_CASES=0
+TOTAL_ALT_CASE_ALLELES=$((2 * HOM_ALT_CASES + HET_CASES))
+CASES_STR="${HOM_ALT_CASES},${HET_CASES},${TOTAL_ALT_CASE_ALLELES}"
+CONTROLS_STR_STRICT="0,0,0"
+
+# Strict filtering
+strict_expr="(Cases = '${CASES_STR}') & (Controls = '${CONTROLS_STR_STRICT}') & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))"
+cond="strict"
+filtered_out="${output_base}_${cond}.g.vcf"
+
+zcat "${vcf_in}" \
+    | java -jar "${snpsift}" filter "${strict_expr}" \
+    > "${filtered_out}"
+
+echo "Strict filtering complete: ${filtered_out}"
+grep -v "^#" "${filtered_out}" | wc -l | xargs echo "Variants retained (strict):"
+
+# Relaxed: allow up to 2 hets in controls
+RELAXED_CONTROL_STRINGS=("0,0,0" "0,1,1" "0,2,2")
+relaxed_controls_expr=""
+for val in "${RELAXED_CONTROL_STRINGS[@]}"; do
+    if [[ -n "$relaxed_controls_expr" ]]; then
+        relaxed_controls_expr="${relaxed_controls_expr} | "
+    fi
+    relaxed_controls_expr="${relaxed_controls_expr}(Controls = '${val}')"
+done
+
+relaxed_expr="(Cases = '${CASES_STR}') & ( ${relaxed_controls_expr} ) & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))"
+cond="relaxed"
+filtered_out="${output_base}_${cond}.g.vcf"
+
+zcat "${vcf_in}" \
+    | java -jar "${snpsift}" filter "${relaxed_expr}" \
+    > "${filtered_out}"
+
+echo "Relaxed filtering complete: ${filtered_out}"
+grep -v "^#" "${filtered_out}" | wc -l | xargs echo "Variants retained (relaxed):"
