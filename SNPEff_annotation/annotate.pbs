@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Extract and annotate SNPs and indels with snpEff 
+
+#PBS -P ki31
+#PBS -N annotate
+#PBS -l walltime=05:00:00
+#PBS -l ncpus=16
+#PBS -l mem=64GB
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/annotate.o
+#PBS -e ./PBS_logs/annotate.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+
+set -e  # Exit if any command fails
+
+module load java
+module load htslib
+
+snpeff=/g/data/ki31/apps/snpEff/snpEff.jar
+db=ARS-UI_Ramb_v2.0
+vcf_in=/scratch/ki31/sheep/GLnexus/33samples_BWAMEM2_deepvariant.vcf.gz
+anno_out=/scratch/ki31/sheep/GLnexus/33samples_BWAMEM2_deepvariant_annotated.vcf
+
+# Run SnpEff annotation
+java -Xmx60g -jar "${snpeff}" -v -stats ./SnpEff/ovine_33s.html "${db}" "${vcf_in}" > "${anno_out}"
+
+# Compress and clean up
+bgzip -@ 4 -c "${anno_out}" > "${anno_out}.gz"
+rm -f "${anno_out}"
+tabix -p vcf "${anno_out}.gz"
