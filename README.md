@@ -1,6 +1,6 @@
 # Counting Sheep (Variants): A Tale of Bioinformatic Pipelines
 
-This repository contains workflows, scripts, and benchmarking results from a methods comparison project evaluating short variant and structural variant calling pipelines for **ovine whole genome sequencing (WGS)** data. The project is part of my PhD research on **molecular characterisation of inherited diseases in livestock**, conducted at the University of Sydney and Elizabeth Macarthur Agricultural Institute (NSW DPIRD).
+This repository contains workflows, scripts, and benchmarking results from a methods comparison project evaluating short variant calling pipelines for **ovine whole genome sequencing (WGS)** data. The project is part of my PhD research on **molecular characterisation of inherited diseases in livestock**, conducted at the University of Sydney and Elizabeth Macarthur Agricultural Institute (NSW DPIRD).
 
 ---
 
