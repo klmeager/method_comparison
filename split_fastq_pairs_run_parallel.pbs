@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#Run 36 x 4 CPU splitting tasks per node. 
+
+#PBS -P ki31
+#PBS -N split_fastq
+#PBS -l walltime=02:00:00
+#PBS -l ncpus=8
+#PBS -l mem=32GB
+#PBS -q express
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs_dragmap/split_fastq.o
+#PBS -e ./PBS_logs_dragmap/split_fastq.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load nci-parallel/1.0.0a
+module load fastp/0.20.0
+
+set -e
+
+SCRIPT=./Scripts/split_fastq_pairs.sh
+INPUTS=./Inputs/split_fastq.inputs
+
+NCPUS=4 
+
+ 
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
