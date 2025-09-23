@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Run fastqc 
+# 1 CPU and 4 GB mem per fastq file 
+
+#PBS -P ki31
+#PBS -N fastqc
+#PBS -l walltime=00:90:00
+#PBS -l ncpus=18
+#PBS -l mem=72GB
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/fastqc.o
+#PBS -e ./PBS_logs/fastqc.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+
+module load nci-parallel/1.0.0a
+module load fastqc/0.11.7
+
+set -e
+
+SCRIPT=./Scripts/fastqc.sh
+INPUTS=./Inputs/fastqc.inputs
+
+NCPUS=1 # CPUs per task
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
