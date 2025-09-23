@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# align pairs and singles separately
+# aligning pairs from fastp split data for extra paralellisation
+# aligning singletons withput first splitting with fastp, because they are so small and fast to align already 
+
+
+# resources: 3822 pairs to align, give each 12 CPUs --> 45864 CPUs total to align all at once. This is 955.5 nodes. 
+# Do 240 nodes, so this will run ~ 4 batches with not too much idle CPUs at the end of the list we hope. 
+# Giving 2 hrs walltime, this is loads, but better safe than sorry :-) Not sure how long each task will 
+# need at the new split size and new CPUs value. Probably will align the lot in less than half hour. 
+# So setting resources to 240 nodes = 45864 CPUs and 72 x 190 GB = 5700
+
+#PBS -P ki31
+#PBS -N align_pairs
+#PBS -l walltime=01:30:00
+#PBS -l ncpus=672
+#PBS -l mem=5320GB
+#PBS -q express
+#PBS -W umask=022
+#PBS -l wd
+#PBS -o ./PBS_logs/align_pairs.o
+#PBS -e ./PBS_logs/align_pairs.e
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load nci-parallel/1.0.0a
+
+module load bwa-mem2/2.2.1 
+module load samtools/1.12
+
+set -e
+
+mkdir -p Align_split Align_split_error_capture BWA_logs
+
+
+SCRIPT=./Scripts/align_pairs.sh
+INPUTS=./Inputs/align_pairs.inputs 
+
+NCPUS=12 # CPUs per parallel task, This varibale will be parsed to the .sh run script so the below line is not needed
+
+ 
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
