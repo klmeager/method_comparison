@@ -1,0 +1,42 @@
+#!/bin/bash 
+
+#Calibrate the model for the dragmap aligned BAM. HC then uses this in dragen calling GATK mode.
+
+#PBS -P ki31 
+#PBS -N calibrate 
+#PBS -l walltime=01:00:00 
+#PBS -l ncpus=25 
+#PBS -l mem=100GB 
+#PBS -q normal 
+#PBS -W umask=022 
+#PBS -l wd 
+#PBS -o ./PBS_logs_dragmap/calibrate_dragmap.o 
+#PBS -e ./PBS_logs_dragmap/calibrate_dragmap.e 
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load nci-parallel/1.0.0a
+module load gatk/4.4.0.0 
+
+set -e
+
+mkdir -p ./Dragmap/Calibrated_model
+
+SCRIPT=./Scripts/calibrate_dragen_str.sh
+INPUTS=./Inputs/25samples.inputs
+
+NCPUS=1
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file
+ 
