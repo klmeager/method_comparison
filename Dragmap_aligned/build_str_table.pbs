@@ -10,8 +10,8 @@
 #PBS -q normal 
 #PBS -W umask=022 
 #PBS -l wd 
-#PBS -o ./PBS_logs/str_dragmap.o 
-#PBS -e ./PBS_logs/str_dragmap.e 
+#PBS -o ./PBS_logs_dragmap/str_dragmap.o 
+#PBS -e ./PBS_logs_dragmap/str_dragmap.e 
 #PBS -lstorage=scratch/ki31+gdata/ki31
 
 module load gatk/4.4.0.0 
