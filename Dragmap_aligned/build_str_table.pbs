@@ -1,0 +1,23 @@
+#!/bin/bash 
+
+#Create STR Table File for the Reference
+
+#PBS -P ki31 
+#PBS -N STR_file 
+#PBS -l walltime=04:30:00 
+#PBS -l ncpus=1 
+#PBS -l mem=32GB 
+#PBS -q normal 
+#PBS -W umask=022 
+#PBS -l wd 
+#PBS -o ./PBS_logs/str_dragmap.o 
+#PBS -e ./PBS_logs/str_dragmap.e 
+#PBS -lstorage=scratch/ki31+gdata/ki31
+
+module load gatk/4.4.0.0 
+
+ref=/scratch/ki31/sheep/Reference/ARS-UI_Ramb_v2.0_genomic.fasta
+
+gatk ComposeSTRTableFile \
+    -R ${ref} \
+    -O ./Reference/str_table.tsv
