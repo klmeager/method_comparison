@@ -67,7 +67,7 @@ All workflows were run on **NCI Gadi**, leveraging:
 
 Resource usage was carefully tracked (CPU hours, SU, memory, walltime). 
 
-## Key Findings
+## Key Findings (preliminary)
 
 - All six pipelines successfully produced VCFs across 25 ovine WGS samples.  
 - **BWA-MEM2 + DeepVariant + GLNexus** was the most **efficient and scalable workflow**, balancing accuracy with compute cost.  
