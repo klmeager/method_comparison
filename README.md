@@ -6,11 +6,11 @@ This repository contains workflows, scripts, and benchmarking results from a met
 
 ## Project Overview
 
-Over the past few decades, the cost of next-generation sequencing has fallen dramatically, making whole genome sequencing (WGS) increasingly accessible for research. This has enabled larger numbers of affected animals to be sequenced, creating exciting opportunities for genetic discovery. However, each genome produces hundreds of gigabytes of data, driving up the demand for computational resources and technical expertise to process and analyse it efficiently.
+Over the past few decades, the cost of next-generation sequencing has fallen dramatically, making whole genome sequencing (WGS) increasingly accessible for research. This has enabled larger numbers of affected animals to be sequenced, creating exciting opportunities for genetic discovery. However, each dataset produces hundreds of gigabytes of data, driving up the demand for computational resources and technical expertise to process and analyse it efficiently.
 
 In parallel, a wide range of new bioinformatic tools and workflows have emerged. In human genetics, these can be benchmarked against highly validated “gold standard” datasets such as the Platinum Genomes, Genome in a Bottle, and the 1000 Genomes Project. These references make it straightforward to assess accuracy and decide on best-practice pipelines. In livestock and other non-model species, no such resources exist, making it far harder to determine which pipelines provide the most accurate, efficient, and reproducible results.
 
-Pipeline choice has real consequences. Tools differ not only in their sensitivity and accuracy but also in the technical expertise required to run them and the computational resources they consume. These trade-offs become especially important when local clusters cannot handle the scale of modern datasets (e.g. Artemis requiring upgrades), forcing researchers to seek allocations on national high-performance computing infrastructure such as **NCI Gadi**.
+Pipeline choice has real consequences. Tools differ not only in their sensitivity and accuracy but also in the technical expertise required to run them and the computational resources they consume. These trade-offs become especially important when local clusters cannot handle the scale of modern datasets, forcing researchers to apply for paid allocations on national high-performance computing infrastructure such as **NCI Gadi**.
 
 This project directly compared six variant calling pipelines for ovine WGS. By running them side-by-side on the same cohort of animals, we assessed how pipeline choice influences variant discovery, runtime, reproducibility, and scalability, with the goal of providing practical recommendations for non-model animal genomics research.
 
@@ -73,10 +73,8 @@ Resource usage was carefully tracked (CPU hours, SU, memory, walltime).
 - **BWA-MEM2 + DeepVariant + GLNexus** was the most **efficient and scalable workflow**, balancing accuracy with compute cost.  
 - GATK HaplotypeCaller (interval-based calling with GenomicDBImport) produced high-quality calls but was **far more resource-intensive** on Gadi.  
 - Pipeline choice significantly influenced **variant counts and overlap**:  
-  - Some variants were unique to certain callers.  
-  - DeepVariant consistently identified variants missed by GATK.  
+  - Some variants were unique to certain callers.    
   - DragMap alignment offered faster runtimes but fewer total variants compared to BWA-MEM2.  
-- Structural variant pipelines (Manta, Smoove, Tiddit + Survivor) were feasible but required careful merging and interpretation.  
 
 ### Practical Outcomes
 - Identified a **preferred WGS pipeline for ovine studies**:  
