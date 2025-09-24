@@ -74,7 +74,7 @@ Resource usage was carefully tracked (CPU hours, SU, memory, walltime).
 - GATK HaplotypeCaller (interval-based calling with GenomicDBImport) produced high-quality calls but was **far more resource-intensive** on Gadi.  
 - Pipeline choice significantly influenced **variant counts and overlap**:  
   - Some variants were unique to certain callers.    
-  - DragMap alignment offered faster runtimes but fewer total variants compared to BWA-MEM2.  
+  - Dragmap alignment offered faster runtimes but fewer total variants compared to BWA-MEM2.  
 
 ### Practical Outcomes
 - Identified a **preferred WGS pipeline for ovine studies**:  
